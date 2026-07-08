@@ -25,7 +25,7 @@
 
 ## 데이터가 만들어지는 곳
 
-이 repo의 `data/`는 사람이 직접 편집하지 않습니다. 회의 녹음 파이프라인(`~/.local/share/meeting-pipeline`, 로컬 전용)이 매일 05:00 새 회의를 처리한 뒤 `generate_app_data.py`로 암호화해 이 repo에 커밋·push합니다. 원본 스크립트·요약본(평문)은 이 repo가 아니라 별도 **private** 저장소에 보관되며, 여기엔 **암호화된 사본만** 올라옵니다.
+이 repo의 `data/`는 사람이 직접 편집하지 않습니다. 회의 녹음 파이프라인(`~/.local/share/meeting-pipeline`, 로컬 전용)이 매일 04:30 새 회의를 처리한 뒤 `generate_app_data.py`로 암호화해 이 repo에 커밋·push합니다. 원본 스크립트·요약본(평문)은 이 repo가 아니라 별도 **private** 저장소에 보관되며, 여기엔 **암호화된 사본만** 올라옵니다.
 
 ## 암호 변경법
 
