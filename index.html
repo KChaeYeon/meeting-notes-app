@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>회의지옥 🔥</title>
+<meta name="description" content="연구 회의 요약·스크립트 뷰어">
+<meta name="theme-color" content="#ff6b6b">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<style>
+  @font-face {
+    font-family: 'Gaegu';
+    src: url('fonts/Gaegu-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    --pink: #ffd7e6;
+    --pink-deep: #ffb3d1;
+    --yellow: #fff3c4;
+    --yellow-deep: #ffcf5c;
+    --mint: #c8f2df;
+    --mint-deep: #8fdbb8;
+    --ink: #444444;
+    --paper: #fffdf9;
+    --line: #ffe3ef;
+    --accent: #ff6b6b;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Gaegu', 'Apple SD Gothic Neo', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px);
+    background-size: 100% 2.1em;
+    background-position: 0 5.4em;
+  }
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--paper);
+    border-bottom: 3px dashed var(--pink-deep);
+  }
+
+  .app-header h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: var(--accent);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .lock-btn {
+    border: 2px solid var(--pink-deep);
+    background: var(--pink);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: 0 3px 0 var(--pink-deep);
+  }
+  .lock-btn:hover { transform: translateY(-1px); }
+  .lock-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--pink-deep); }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 18px 16px 60px;
+  }
+
+  /* ---------- gate overlay ---------- */
+  #gate {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 30% 20%, var(--yellow) 0%, var(--pink) 55%, var(--mint) 100%);
+    padding: 20px;
+  }
+
+  .gate-card {
+    background: var(--paper);
+    border-radius: 28px;
+    padding: 34px 28px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 14px 0 rgba(255,179,209,0.6), 0 20px 40px rgba(0,0,0,0.08);
+    border: 3px solid var(--pink-deep);
+    position: relative;
+  }
+
+  .gate-card .sticker {
+    font-size: 2.6rem;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .gate-card h2 {
+    margin: 0 0 4px;
+    color: var(--accent);
+    font-size: 1.7rem;
+  }
+
+  .gate-card p.sub {
+    margin: 0 0 20px;
+    color: #999;
+    font-size: 0.95rem;
+  }
+
+  .gate-card input[type="password"] {
+    width: 100%;
+    font-family: inherit;
+    font-size: 1.4rem;
+    letter-spacing: 0.3em;
+    text-align: center;
+    padding: 12px 10px;
+    border-radius: 16px;
+    border: 3px solid var(--mint-deep);
+    background: #fff;
+    color: var(--ink);
+    outline: none;
+    margin-bottom: 14px;
+  }
+  .gate-card input[type="password"]:focus {
+    border-color: var(--accent);
+  }
+
+  .remember-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    font-size: 0.95rem;
+    color: #777;
+  }
+  .remember-row input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+  .gate-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 16px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-family: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #d94f4f;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .gate-btn:hover { transform: translateY(-1px); }
+  .gate-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #d94f4f; }
+
+  .gate-error {
+    margin-top: 14px;
+    color: #e0507a;
+    font-size: 1rem;
+    min-height: 1.4em;
+  }
+
+  #gate.hidden, .hidden { display: none !important; }
+
+  /* ---------- meeting list ---------- */
+  .list-wide {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .meeting-card {
+    background: var(--paper);
+    border: 2px solid var(--line);
+    border-radius: 18px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--pink);
+    transition: transform .12s ease, box-shadow .12s ease;
+    position: relative;
+  }
+  .meeting-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--pink);
+  }
+  .meeting-card::before {
+    content: "📔";
+    position: absolute;
+    top: -10px;
+    left: -8px;
+    font-size: 1.3rem;
+    transform: rotate(-15deg);
+  }
+
+  .meeting-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .meeting-date {
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .meeting-title {
+    font-size: 1.25rem;
+    color: var(--ink);
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .chip {
+    background: var(--mint);
+    color: #2c7a58;
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-size: 0.85rem;
+    border: 1px solid var(--mint-deep);
+  }
+  .go-arrow {
+    font-size: 1.4rem;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: #aaa;
+    padding: 60px 20px;
+    font-size: 1.1rem;
+  }
+
+  /* ---------- detail ---------- */
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--yellow);
+    border: 2px solid var(--yellow-deep);
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 16px;
+    box-shadow: 0 3px 0 var(--yellow-deep);
+  }
+  .back-btn:active { transform: translateY(2px); box-shadow: none; }
+
+  .detail-card {
+    background: var(--paper);
+    border: 2px solid var(--line);
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: 4px 4px 0 var(--mint);
+  }
+
+  .detail-header h2 {
+    margin: 0 0 4px;
+    color: var(--accent);
+    font-size: 1.6rem;
+  }
+  .detail-date {
+    color: #999;
+    margin-bottom: 10px;
+  }
+
+  .panel-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 14px;
+    border-bottom: 3px dashed var(--pink-deep);
+    padding-bottom: 10px;
+  }
+  .panel-tab-btn {
+    font-family: inherit;
+    font-size: 1.05rem;
+    padding: 8px 18px;
+    border-radius: 999px 999px 0 0;
+    border: 2px solid var(--pink-deep);
+    border-bottom: none;
+    background: var(--pink);
+    color: #a15a72;
+    cursor: pointer;
+  }
+  .panel-tab-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .panel-tab-content { display: none; }
+  .panel-tab-content.active { display: block; }
+
+  .summary-body {
+    line-height: 1.75;
+    font-size: 1.05rem;
+  }
+  .summary-body h1, .summary-body h2, .summary-body h3 { color: var(--accent); }
+  .summary-body code {
+    background: var(--yellow);
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+  .summary-body ul { padding-left: 1.3em; }
+
+  .script-body {
+    white-space: pre-wrap;
+    line-height: 1.8;
+    font-size: 1rem;
+    background: repeating-linear-gradient(var(--paper), var(--paper) 1.9em, var(--line) 2em);
+  }
+
+  .loading {
+    text-align: center;
+    color: #bbb;
+    padding: 40px 0;
+  }
+
+  footer.credit {
+    text-align: center;
+    color: #ccc;
+    font-size: 0.85rem;
+    padding: 30px 0 10px;
+  }
+
+  /* ---------- mobile ≤700px : force stacked cards ---------- */
+  @media (max-width: 700px) {
+    .app-header h1 { font-size: 1.3rem; }
+    main { padding: 14px 10px 50px; }
+    .meeting-card { flex-direction: column; align-items: flex-start; }
+    .go-arrow { display: none; }
+    .meeting-title { white-space: normal; }
+    .detail-card { padding: 16px; }
+    .panel-tab-btn { font-size: 0.95rem; padding: 7px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-card">
+    <span class="sticker">🐣🔥📔</span>
+    <h2>회의지옥</h2>
+    <p class="sub">암호를 입력하면 오늘의 회의가 열려요</p>
+    <form id="gate-form" autocomplete="off">
+      <input type="password" id="gate-passcode" inputmode="numeric" placeholder="••••" maxlength="16" autofocus>
+      <div class="remember-row">
+        <input type="checkbox" id="gate-remember" checked>
+        <label for="gate-remember">이 기기에서 암호 기억하기</label>
+      </div>
+      <button type="submit" class="gate-btn">열기 ⭐️</button>
+      <div class="gate-error" id="gate-error"></div>
+    </form>
+  </div>
+</div>
+
+<header class="app-header hidden" id="app-header">
+  <h1>회의지옥 🔥</h1>
+  <button class="lock-btn" id="lock-btn">🔒 잠금</button>
+</header>
+
+<main class="hidden" id="app-main">
+  <div id="view-list"></div>
+  <div id="view-detail" class="hidden"></div>
+  <footer class="credit">🖍️ made with crayons &amp; coffee</footer>
+</main>
+
+<script src="vendor/marked.min.js"></script>
+<script src="crypto.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  let cryptoMeta = null;   // {v,kdf,iter,salt}
+  let sessionKey = null;   // CryptoKey (memory only)
+  let indexCache = null;   // decrypted index array
+
+  const gate = document.getElementById("gate");
+  const gateForm = document.getElementById("gate-form");
+  const gatePass = document.getElementById("gate-passcode");
+  const gateRemember = document.getElementById("gate-remember");
+  const gateError = document.getElementById("gate-error");
+  const appHeader = document.getElementById("app-header");
+  const appMain = document.getElementById("app-main");
+  const lockBtn = document.getElementById("lock-btn");
+  const viewList = document.getElementById("view-list");
+  const viewDetail = document.getElementById("view-detail");
+
+  function showGate(msg) {
+    gate.classList.remove("hidden");
+    appHeader.classList.add("hidden");
+    appMain.classList.add("hidden");
+    gateError.textContent = msg || "";
+    gatePass.value = "";
+    setTimeout(() => gatePass.focus(), 50);
+  }
+
+  function showApp() {
+    gate.classList.add("hidden");
+    appHeader.classList.remove("hidden");
+    appMain.classList.remove("hidden");
+  }
+
+  async function loadCryptoMeta() {
+    if (cryptoMeta) return cryptoMeta;
+    const res = await fetch("data/crypto.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("crypto.json fetch failed");
+    cryptoMeta = await res.json();
+    return cryptoMeta;
+  }
+
+  async function tryUnlock(passcode) {
+    const meta = await loadCryptoMeta();
+    const key = await deriveKey(passcode, meta.salt, meta.iter);
+    const res = await fetch("data/index.enc", { cache: "no-store" });
+    if (!res.ok) throw new Error("index.enc fetch failed");
+    const blob = await res.json();
+    const text = await decryptBlob(blob, key); // throws if wrong key
+    sessionKey = key;
+    indexCache = JSON.parse(text);
+    return true;
+  }
+
+  async function boot() {
+    const savedPass = localStorage.getItem("mh_pass");
+    if (savedPass) {
+      try {
+        await tryUnlock(savedPass);
+        showApp();
+        router();
+        return;
+      } catch (e) {
+        localStorage.removeItem("mh_pass");
+      }
+    }
+    showGate();
+  }
+
+  gateForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const pass = gatePass.value.trim();
+    if (!pass) return;
+    gateError.textContent = "";
+    try {
+      await tryUnlock(pass);
+      if (gateRemember.checked) {
+        localStorage.setItem("mh_pass", pass);
+      } else {
+        localStorage.removeItem("mh_pass");
+      }
+      showApp();
+      router();
+    } catch (err) {
+      gateError.textContent = "앗! 암호가 틀렸어요 🔒";
+    }
+  });
+
+  lockBtn.addEventListener("click", () => {
+    localStorage.removeItem("mh_pass");
+    sessionKey = null;
+    indexCache = null;
+    location.hash = "";
+    showGate();
+  });
+
+  // ---------- routing ----------
+  function router() {
+    const hash = location.hash || "";
+    const m = hash.match(/^#\/m\/(.+)$/);
+    if (m) {
+      viewList.classList.add("hidden");
+      viewDetail.classList.remove("hidden");
+      renderDetail(decodeURIComponent(m[1]));
+    } else {
+      viewDetail.classList.add("hidden");
+      viewList.classList.remove("hidden");
+      renderList();
+    }
+  }
+  window.addEventListener("hashchange", router);
+
+  function escapeHtml(s) {
+    return (s || "").replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  function renderList() {
+    if (!indexCache || !indexCache.length) {
+      viewList.innerHTML = '<div class="empty-state">아직 회의록이 없어요 🐣</div>';
+      return;
+    }
+    const items = indexCache.map(m => {
+      const chips = (m.keywords || []).map(k => `<span class="chip">${escapeHtml(k)}</span>`).join("");
+      return `
+        <div class="meeting-card" data-id="${escapeHtml(m.id)}">
+          <div class="meeting-main">
+            <div class="meeting-date">🗓️ ${escapeHtml(m.date)}</div>
+            <div class="meeting-title">${escapeHtml(m.title)}</div>
+            <div class="chips">${chips}</div>
+          </div>
+          <div class="go-arrow">➡️</div>
+        </div>`;
+    }).join("");
+    viewList.innerHTML = `<div class="list-wide">${items}</div>`;
+    viewList.querySelectorAll(".meeting-card").forEach(el => {
+      el.addEventListener("click", () => {
+        location.hash = `#/m/${encodeURIComponent(el.dataset.id)}`;
+      });
+    });
+  }
+
+  async function fetchAndDecrypt(path) {
+    const res = await fetch(path, { cache: "no-store" });
+    if (!res.ok) throw new Error(`${path} fetch failed`);
+    const blob = await res.json();
+    return decryptBlob(blob, sessionKey);
+  }
+
+  async function renderDetail(id) {
+    const meta = (indexCache || []).find(m => m.id === id);
+    viewDetail.innerHTML = `
+      <button class="back-btn" id="back-btn">⬅️ 목록으로</button>
+      <div class="detail-card">
+        <div class="detail-header">
+          <h2>${escapeHtml(meta ? meta.title : id)}</h2>
+          <div class="detail-date">🗓️ ${escapeHtml(meta ? meta.date : "")}</div>
+        </div>
+        <div class="panel-tabs">
+          <button class="panel-tab-btn active" data-tab="summary">요약본</button>
+          <button class="panel-tab-btn" data-tab="script">스크립트 전문</button>
+        </div>
+        <div class="panel-tab-content active" id="tab-summary"><div class="loading">불러오는 중... 🖍️</div></div>
+        <div class="panel-tab-content" id="tab-script"><div class="loading">불러오는 중... 🖍️</div></div>
+      </div>
+    `;
+    document.getElementById("back-btn").addEventListener("click", () => {
+      location.hash = "";
+    });
+    viewDetail.querySelectorAll(".panel-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        viewDetail.querySelectorAll(".panel-tab-btn").forEach(b => b.classList.remove("active"));
+        viewDetail.querySelectorAll(".panel-tab-content").forEach(c => c.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(`tab-${btn.dataset.tab}`).classList.add("active");
+      });
+    });
+
+    try {
+      const summaryMd = await fetchAndDecrypt(`data/${encodeURIComponent(id)}/summary.enc`);
+      document.getElementById("tab-summary").innerHTML =
+        `<div class="summary-body">${marked.parse(summaryMd)}</div>`;
+    } catch (e) {
+      document.getElementById("tab-summary").innerHTML = `<div class="empty-state">요약을 불러오지 못했어요 😢</div>`;
+    }
+    try {
+      const scriptTxt = await fetchAndDecrypt(`data/${encodeURIComponent(id)}/script.enc`);
+      document.getElementById("tab-script").innerHTML =
+        `<div class="script-body">${escapeHtml(scriptTxt)}</div>`;
+    } catch (e) {
+      document.getElementById("tab-script").innerHTML = `<div class="empty-state">스크립트를 불러오지 못했어요 😢</div>`;
+    }
+  }
+
+  // ---------- PWA install ----------
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    });
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

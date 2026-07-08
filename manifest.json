@@ -1,0 +1,11 @@
+{
+  "name": "회의지옥 🔥", "short_name": "회의지옥",
+  "description": "연구 회의 요약·스크립트 뷰어",
+  "start_url": "/meeting-notes-app/", "scope": "/meeting-notes-app/",
+  "display": "standalone", "orientation": "portrait",
+  "background_color": "#fffdf7", "theme_color": "#ff6b6b",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
