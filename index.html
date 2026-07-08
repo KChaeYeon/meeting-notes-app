@@ -19,6 +19,22 @@
     font-display: swap;
   }
 
+  @font-face {
+    font-family: 'Noto Sans KR';
+    src: url('fonts/NotoSansKR-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Noto Sans KR';
+    src: url('fonts/NotoSansKR-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
   :root {
     --pink: #ffd7e6;
     --pink-deep: #ffb3d1;
@@ -40,7 +56,7 @@
     min-height: 100%;
     background: var(--paper);
     color: var(--ink);
-    font-family: 'Gaegu', 'Apple SD Gothic Neo', sans-serif;
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -268,6 +284,144 @@
     font-size: 1.1rem;
   }
 
+  /* ---------- view mode toggle ---------- */
+  .view-toggle {
+    display: inline-flex;
+    background: var(--yellow);
+    border: 2px solid var(--yellow-deep);
+    border-radius: 999px;
+    padding: 4px;
+    margin-bottom: 18px;
+    gap: 4px;
+  }
+  .view-toggle-btn {
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 7px 16px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: #8a6d1d;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+  .view-toggle-btn.active {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 3px 0 #d94f4f;
+  }
+
+  /* ---------- topic overview (mode A) ---------- */
+  .topic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .topic-card {
+    background: var(--tc-bg, var(--paper));
+    border: 2px solid var(--tc-border, var(--line));
+    border-radius: 18px;
+    padding: 18px 20px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--tc-border, var(--pink));
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .topic-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--tc-border, var(--pink));
+  }
+  .topic-card-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--tc-text, var(--ink));
+    margin-bottom: 10px;
+    line-height: 1.35;
+  }
+  .topic-card-count {
+    display: inline-block;
+    font-size: 0.9rem;
+    background: rgba(255,255,255,0.65);
+    padding: 3px 12px;
+    border-radius: 999px;
+    color: var(--tc-text, var(--ink));
+  }
+
+  .topic-detail-title {
+    color: var(--accent);
+    font-size: 1.4rem;
+    margin: 4px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topic-detail-count {
+    font-size: 0.9rem;
+    background: var(--yellow);
+    border-radius: 999px;
+    padding: 3px 12px;
+    color: #8a6d1d;
+  }
+
+  /* ---------- table mode (mode B) ---------- */
+  .meeting-table {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mt-row {
+    display: grid;
+    grid-template-columns: 84px 1fr 150px;
+    gap: 14px;
+    align-items: start;
+    background: var(--paper);
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    padding: 12px 16px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--mint);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .mt-row:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--mint);
+  }
+  .mt-cell { min-width: 0; }
+  .mt-date {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+    color: #888;
+    padding-top: 2px;
+  }
+  .mt-date-d { font-weight: 700; }
+  .mt-date-t { color: #aaa; }
+  .mt-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+  }
+  .mt-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+  .mt-keywords {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .mt-keywords .chip {
+    font-size: 0.78rem;
+    padding: 2px 10px;
+    align-self: flex-start;
+  }
+
   /* ---------- detail ---------- */
   .back-btn {
     display: inline-flex;
@@ -371,6 +525,8 @@
     .meeting-title { white-space: normal; }
     .detail-card { padding: 16px; }
     .panel-tab-btn { font-size: 0.95rem; padding: 7px 14px; }
+    .mt-row { grid-template-columns: 1fr; gap: 8px; }
+    .mt-date { flex-direction: row; gap: 8px; align-items: baseline; }
   }
 </style>
 </head>
@@ -413,6 +569,24 @@
   let cryptoMeta = null;   // {v,kdf,iter,salt}
   let sessionKey = null;   // CryptoKey (memory only)
   let indexCache = null;   // decrypted index array
+  let viewMode = localStorage.getItem("mh_view_mode") || "topic"; // "topic" | "table"
+
+  // pastel palette for topic color-coding (order matches existing pink/yellow/mint identity)
+  const TOPIC_PALETTE = [
+    { bg: "#ffd7e6", border: "#ffb3d1", text: "#a15a72" }, // pink
+    { bg: "#fff3c4", border: "#ffcf5c", text: "#8a6d1d" }, // yellow
+    { bg: "#c8f2df", border: "#8fdbb8", text: "#2c7a58" }, // mint
+    { bg: "#d7e6ff", border: "#a8c6ff", text: "#3a5a9c" }, // pastel blue
+    { bg: "#e6d9ff", border: "#c9aeff", text: "#6b4a9c" }, // lavender
+    { bg: "#ffe3cc", border: "#ffc38f", text: "#a15a2c" }, // peach
+    { bg: "#dcecc9", border: "#b8d98f", text: "#547a2c" }, // sage
+  ];
+  function topicColor(topic) {
+    const s = topic || "미분류";
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return TOPIC_PALETTE[h % TOPIC_PALETTE.length];
+  }
 
   const gate = document.getElementById("gate");
   const gateForm = document.getElementById("gate-form");
@@ -506,10 +680,15 @@
   function router() {
     const hash = location.hash || "";
     const m = hash.match(/^#\/m\/(.+)$/);
+    const t = hash.match(/^#\/t\/(.+)$/);
     if (m) {
       viewList.classList.add("hidden");
       viewDetail.classList.remove("hidden");
       renderDetail(decodeURIComponent(m[1]));
+    } else if (t) {
+      viewDetail.classList.add("hidden");
+      viewList.classList.remove("hidden");
+      renderTopicDetail(decodeURIComponent(t[1]));
     } else {
       viewDetail.classList.add("hidden");
       viewList.classList.remove("hidden");
@@ -524,29 +703,95 @@
     }[c]));
   }
 
-  function renderList() {
-    if (!indexCache || !indexCache.length) {
-      viewList.innerHTML = '<div class="empty-state">아직 회의록이 없어요 🐣</div>';
-      return;
-    }
-    const items = indexCache.map(m => {
-      const chips = (m.keywords || []).map(k => `<span class="chip">${escapeHtml(k)}</span>`).join("");
+  function renderViewToggle() {
+    return `
+      <div class="view-toggle">
+        <button class="view-toggle-btn ${viewMode === "topic" ? "active" : ""}" data-mode="topic">📚 주제별</button>
+        <button class="view-toggle-btn ${viewMode === "table" ? "active" : ""}" data-mode="table">📅 표 형식</button>
+      </div>`;
+  }
+
+  function renderTopicOverview() {
+    const groups = {};
+    indexCache.forEach(m => {
+      const t = m.topic || "미분류";
+      (groups[t] = groups[t] || []).push(m);
+    });
+    const cards = Object.keys(groups).map(name => {
+      const color = topicColor(name);
       return `
-        <div class="meeting-card" data-id="${escapeHtml(m.id)}">
-          <div class="meeting-main">
-            <div class="meeting-date">🗓️ ${escapeHtml(m.date)}</div>
-            <div class="meeting-title">${escapeHtml(m.title)}</div>
-            <div class="chips">${chips}</div>
-          </div>
-          <div class="go-arrow">➡️</div>
+        <div class="topic-card" data-topic="${escapeHtml(name)}" style="--tc-bg:${color.bg};--tc-border:${color.border};--tc-text:${color.text}">
+          <div class="topic-card-name">${escapeHtml(name)}</div>
+          <div class="topic-card-count">${groups[name].length}건</div>
         </div>`;
     }).join("");
-    viewList.innerHTML = `<div class="list-wide">${items}</div>`;
-    viewList.querySelectorAll(".meeting-card").forEach(el => {
+    return `<div class="topic-grid">${cards}</div>`;
+  }
+
+  function renderMeetingTable(list) {
+    if (!list.length) {
+      return '<div class="empty-state">아직 회의록이 없어요 🐣</div>';
+    }
+    const sorted = [...list].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    const rows = sorted.map(m => {
+      const parts = (m.date || "").split(" ");
+      const dateOnly = parts[0] || "";
+      const timeOnly = parts[1] || "";
+      const color = topicColor(m.topic);
+      const chips = (m.keywords || []).map(k => `<span class="chip">${escapeHtml(k)}</span>`).join("");
+      return `
+        <div class="mt-row" data-id="${escapeHtml(m.id)}">
+          <div class="mt-cell mt-date"><span class="mt-date-d">${escapeHtml(dateOnly)}</span><span class="mt-date-t">${escapeHtml(timeOnly)}</span></div>
+          <div class="mt-cell mt-title"><span class="mt-dot" style="background:${color.border}"></span>${escapeHtml(m.title)}</div>
+          <div class="mt-cell mt-keywords">${chips}</div>
+        </div>`;
+    }).join("");
+    return `<div class="meeting-table">${rows}</div>`;
+  }
+
+  function bindTableRowClicks(root) {
+    root.querySelectorAll(".mt-row").forEach(el => {
       el.addEventListener("click", () => {
         location.hash = `#/m/${encodeURIComponent(el.dataset.id)}`;
       });
     });
+  }
+
+  function renderList() {
+    if (!indexCache || !indexCache.length) {
+      viewList.innerHTML = renderViewToggle() + '<div class="empty-state">아직 회의록이 없어요 🐣</div>';
+      return;
+    }
+    const body = viewMode === "topic" ? renderTopicOverview() : renderMeetingTable(indexCache);
+    viewList.innerHTML = renderViewToggle() + body;
+
+    viewList.querySelectorAll(".view-toggle-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (btn.dataset.mode === viewMode) return;
+        viewMode = btn.dataset.mode;
+        localStorage.setItem("mh_view_mode", viewMode);
+        renderList();
+      });
+    });
+    viewList.querySelectorAll(".topic-card").forEach(el => {
+      el.addEventListener("click", () => {
+        location.hash = `#/t/${encodeURIComponent(el.dataset.topic)}`;
+      });
+    });
+    bindTableRowClicks(viewList);
+  }
+
+  function renderTopicDetail(topicName) {
+    const list = (indexCache || []).filter(m => (m.topic || "미분류") === topicName);
+    viewList.innerHTML = `
+      <button class="back-btn" id="topic-back-btn">⬅️ 목록으로</button>
+      <div class="topic-detail-title">${escapeHtml(topicName)} <span class="topic-detail-count">${list.length}건</span></div>
+      ${renderMeetingTable(list)}
+    `;
+    document.getElementById("topic-back-btn").addEventListener("click", () => {
+      location.hash = "";
+    });
+    bindTableRowClicks(viewList);
   }
 
   async function fetchAndDecrypt(path) {

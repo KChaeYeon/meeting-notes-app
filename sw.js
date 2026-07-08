@@ -7,6 +7,8 @@ const ASSETS = [
   SCOPE + "crypto.js",
   SCOPE + "vendor/marked.min.js",
   SCOPE + "fonts/Gaegu-Regular.ttf",
+  SCOPE + "fonts/NotoSansKR-Regular.woff2",
+  SCOPE + "fonts/NotoSansKR-Bold.woff2",
   SCOPE + "icons/icon-192.png",
   SCOPE + "icons/icon-512.png",
 ];
