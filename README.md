@@ -41,6 +41,19 @@
 2. `generate_app_data.py` 재실행(캐시에 keywords/summary/topic이 모두 있으면 `claude` 재호출 없이 즉시 재생성됨) → 커밋·push.
 3. 주제는 데이터에서 동적으로 도출되므로, 어떤 회의도 쓰지 않는 주제는 목록에서 자동으로 사라집니다(별도 삭제 절차 불필요).
 
+## 회의 스크립트·요약 내용을 고치고 싶을 때
+
+이 repo에는 **암호화된 사본만** 있어서 여기서 직접 고칠 수 없습니다. 원본은 별도 private 저장소(`KChaeYeon/Meeting_minutes`)의 `minutes/<회의폴더명>/script.md`·`minutes.md`이며, 거기서 수정 후 아래를 실행해야 이 앱에 반영됩니다(자동 반영 안 됨):
+
+```bash
+cd ~/.local/share/meeting-pipeline
+.venv/bin/python generate_app_data.py      # 수정 내용을 반영해 data/ 재암호화
+cd ~/meeting-notes-app
+git add -A && git commit -m "data: 회의록 수정 반영" && git push
+```
+
+Notion 동기화까지 포함한 전체 절차(원본 백업 커밋, Notion 재동기화 등)는 `Meeting_minutes` repo README의 "회의록 내용을 수정하고 싶을 때" 섹션을 참고하세요.
+
 ## 구조
 
 ```
